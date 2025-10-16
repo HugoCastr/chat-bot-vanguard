@@ -1,0 +1,10 @@
+id_produto,peca,moto,ano_inicio,ano_fim,preco,estoque
+101,filtro de oleo,fan 160,2020,2024,35.50,15
+102,filtro de oleo,fan 125,2014,2018,29.90,8
+201,pneu,lander 250,2019,2025,350.00,5
+202,pneu dianteiro,lander 250,2019,2025,320.00,7
+301,relacao,titan 150,2014,2016,180.75,12
+302,kit transmissao,titan 150,2014,2016,185.00,10
+401,retrovisor,fazer 250,2018,2022,95.00,20
+402,retrovisor,fan 160,2020,2024,75.00,30
+501,vela de ignicao,titan 150,2009,2016,25.00,50
