@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import requests
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import json
 import io
@@ -14,6 +15,19 @@ class mensagem_entrada(BaseModel):
 load_dotenv()
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:5173",
+    "https://startup-vanguard.vercel.app"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,          # origens permitidas
+    allow_credentials=True,
+    allow_methods=["*"],            # todos os métodos (GET, POST, etc)
+    allow_headers=["*"],            # todos os headers
+)
 
 @app.post("/chat/")
 def chat_endpoint(mensagem: mensagem_entrada):
