@@ -1,4 +1,4 @@
-from google import genai
+from google.genai import Client
 import os
 from dotenv import load_dotenv
 import requests
@@ -35,7 +35,7 @@ def extracao(mensagem):
     try:
         print("Chamada para a API do Gemini")
         mensagem_usuario = mensagem
-        client = genai.Client(api_key=gemini_api_key)
+        client = Client(api_key=gemini_api_key)
 
         prompt = client.models.generate_content(
             model="gemini-2.5-flash", contents= f"""
@@ -160,7 +160,7 @@ def verificar_texto(url_doc, peca, modelo):
             print("URL do documento está vazia. Retornando False.")
             return "False"
         
-        client = genai.Client(api_key=gemini_api_key)
+        client = Client(api_key=gemini_api_key)
         long_context_pdf_path = url_doc
         pdf_response = requests.get(long_context_pdf_path)
         pdf_response.raise_for_status() 
