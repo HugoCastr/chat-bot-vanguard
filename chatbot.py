@@ -135,7 +135,6 @@ def api_java(peca, modelo, token):
 
         for produto in dados:
             id_produto = produto['id']
-            url_foto = produto['urlFoto']
             url_doc = produto['urlDocumento']
             
             salvo = verificar_texto(url_doc, peca, modelo)
@@ -148,10 +147,7 @@ def api_java(peca, modelo, token):
             if resultado_verificacao == "True":
                 print(f"Produto {id_produto} é compatível. Adicionando.")
 
-                produtos_compativeis.append({
-                    "id": id_produto,
-                    "url_foto": url_foto
-                })
+                produtos_compativeis.append(produto)
             else:
                 print(f"Produto {id_produto} NÃO é compatível ou falhou na verificação.")
 
