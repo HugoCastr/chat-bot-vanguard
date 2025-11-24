@@ -23,10 +23,10 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,          # origens permitidas
+    allow_origins=origins,          
     allow_credentials=True,
-    allow_methods=["*"],            # todos os métodos (GET, POST, etc)
-    allow_headers=["*"],            # todos os headers
+    allow_methods=["*"],            
+    allow_headers=["*"],            
 )
 
 @app.post("/chat/")
@@ -35,17 +35,13 @@ def chat_endpoint(mensagem: mensagem_entrada):
     return {"resposta": resposta}
 
 gemini_api_key = os.getenv("GEMINI_API_KEY")
-
 url = os.getenv("URL_API")
 
 def chamada(mensagem, token):
-
     requisitar = requisição_peca(mensagem, token)
-
     return requisitar
 
 def extracao(mensagem):
-    
     try:
         print("Chamada para a API do Gemini")
         mensagem_usuario = mensagem
@@ -86,22 +82,19 @@ def extracao(mensagem):
             """
         )
         print("Resposta da API do Gemini:")
-        
         return prompt.text
     
     except Exception as e:
         return f"Ocorreu um erro ao chamar a API: {e}"
     
 def validacao(peca):
-
     if not peca or peca == "null":
-        return "Digite o nome da peça que deseja."
+        return "Não consegui identificar qual peça você procura. Poderia reformular?" 
     else:
         return True
 
 def requisição_peca(mensagem , token):
     json_resposta = extracao(mensagem)
-
     peca, modelo_ano = separar(json_resposta)
 
     print(f"Requisição da peça: Peça='{peca}', Modelo='{modelo_ano}'")
@@ -126,10 +119,12 @@ def api_java(peca, modelo, token):
         peca_json= {"nome": peca}
 
         response = requests.get(url, headers=headers, params=peca_json) 
-
         response.raise_for_status() 
 
         dados = response.json()
+
+        if not dados:
+            return f"Desculpe, não encontrei nenhum produto chamado '{peca}' no nosso estoque no momento."
 
         produtos_compativeis = []
 
@@ -146,26 +141,33 @@ def api_java(peca, modelo, token):
 
             if resultado_verificacao == "True":
                 print(f"Produto {id_produto} é compatível. Adicionando.")
-
                 produtos_compativeis.append(produto)
             else:
                 print(f"Produto {id_produto} NÃO é compatível ou falhou na verificação.")
 
-        
+        if not produtos_compativeis:
+            if modelo != "null":
+                return f"Encontrei opções de '{peca}', mas infelizmente nenhuma delas é compatível com a '{modelo}' segundo as especificações técnicas."
+            else:
+                return f"Temos '{peca}' em estoque, mas não consegui confirmar a compatibilidade automaticamente. Por favor, verifique os detalhes com um atendente."
+
         return produtos_compativeis
 
     except requests.exceptions.HTTPError as errh:
         print(f"Erro HTTP: {errh}")
+        return "Erro de comunicação com o servidor de peças."
     except requests.exceptions.ConnectionError as errc:
         print(f"Erro de Conexão: {errc}")
+        return "Erro de conexão ao buscar produtos."
     except requests.exceptions.Timeout as errt: 
         print(f"Erro de Timeout: {errt}")
+        return "O servidor demorou muito para responder."
     except requests.exceptions.RequestException as err:
         print(f"Erro na Requisição: {err}")
+        return "Ocorreu um erro inesperado na busca."
 
 def verificar_texto(url_doc, peca, modelo):
     try:
-
         if not url_doc:
             print("URL do documento está vazia. Retornando False.")
             return "False"
@@ -182,7 +184,7 @@ def verificar_texto(url_doc, peca, modelo):
                 mime_type='application/pdf')
         )
 
-        prompt = contents= f"""
+        prompt_texto = f"""
             ### FUNÇÃO ###
             Você é um assistente de verificação de compatibilidade de {peca} de moto.
 
@@ -204,24 +206,22 @@ def verificar_texto(url_doc, peca, modelo):
             """
 
         response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=[sample_doc, prompt])
+            model="gemini-2.5-flash",
+            contents=[sample_doc, prompt_texto]
+        )
         return response.text
     
     except Exception as e:
-        return f"Ocorreu um erro ao verificar o texto no PDF: {e}"
+        print(f"Erro no verificar_texto: {e}") 
     
 def separar(json_string):
-
     try:
         data = json.loads(json_string)
         peca = data.get("peca", "null")
         modelo_ano = data.get("modelo_ano", "null")
-
         return peca, modelo_ano
     
     except json.JSONDecodeError:
         print(f"Erro: A IA não retornou um JSON válido. Resposta: {json_string}")
         return "null", "null"
     
-
